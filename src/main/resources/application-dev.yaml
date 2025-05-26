@@ -1,0 +1,10 @@
+application:
+  innovative:
+    url: <innovative-api-url>
+    username: <innovative-api-username>
+    password: <innovative-api-password>
+    api-key: <innovative-api-key>
+    okid-api-key: <innovative-okid-api-key>
+    okdoc-api-key: <innovative-okdoc-api-key>
+    okface-api-key: <innovative-okface-api-key>
+    oklive-api-key: <innovative-oklive-api-key>
