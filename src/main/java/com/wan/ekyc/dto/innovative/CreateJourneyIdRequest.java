@@ -1,4 +1,4 @@
-package com.wan.ekyc.dto;
+package com.wan.ekyc.dto.innovative;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
