@@ -39,7 +39,7 @@ public class InnovativeResource {
             return ResponseEntity.badRequest().body("Back ID is required");
         }
 
-        var result = service.initOkID(journeyId, frontId, backId, true);
+        var result = service.initOkId(journeyId, frontId, backId, true);
         if (result == null) {
             return ResponseEntity.internalServerError().build();
         }
@@ -54,7 +54,37 @@ public class InnovativeResource {
             return ResponseEntity.badRequest().body("Passport is required");
         }
 
-        var result = service.initOkID(journeyId, passport, null, false);
+        var result = service.initOkId(journeyId, passport, null, false);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/okdoc/{journeyId}/mykad")
+    public ResponseEntity<?> initOkDocMyKad(@PathVariable String journeyId) {
+        String frontId = ImageUtil.getFrontIdBase64();
+        if (frontId == null) {
+            return ResponseEntity.badRequest().body("Front ID is required");
+        }
+
+        var result = service.initOkDoc(journeyId, frontId, true);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/okdoc/{journeyId}/passport")
+    public ResponseEntity<?> initOkDocPassport(@PathVariable String journeyId) {
+        String passport = ImageUtil.getPassportBase64();
+        if (passport == null) {
+            return ResponseEntity.badRequest().body("Passport is required");
+        }
+
+        var result = service.initOkDoc(journeyId, passport, false);
         if (result == null) {
             return ResponseEntity.internalServerError().build();
         }
