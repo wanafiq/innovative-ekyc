@@ -1,4 +1,4 @@
-package com.wan.innovative_ekyc.config;
+package com.wan.ekyc.config;
 
 import lombok.Data;
 import lombok.Getter;
@@ -14,7 +14,7 @@ public class ApplicationConfig {
     private final Innovative innovative = new Innovative();
 
     @Data
-    private static class Innovative {
+    public static class Innovative {
         private String url;
         private String username;
         private String password;

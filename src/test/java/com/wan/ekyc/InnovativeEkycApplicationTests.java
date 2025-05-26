@@ -1,4 +1,4 @@
-package com.wan.innovative_ekyc;
+package com.wan.ekyc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
