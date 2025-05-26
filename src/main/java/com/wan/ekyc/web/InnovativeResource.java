@@ -91,4 +91,24 @@ public class InnovativeResource {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/okface/{journeyId}")
+    public ResponseEntity<?> initOkFace(@PathVariable String journeyId) {
+        String frontId = ImageUtil.getFrontIdBase64();
+        if (frontId == null) {
+            return ResponseEntity.badRequest().body("Front ID is required");
+        }
+
+        String selfie = ImageUtil.getSelfieBase64();
+        if (selfie == null) {
+            return ResponseEntity.badRequest().body("Selfie is required");
+        }
+
+        var result = service.initOkFace(journeyId, frontId, selfie);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }

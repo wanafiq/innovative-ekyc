@@ -5,6 +5,8 @@ import com.wan.ekyc.dto.innovative.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -95,13 +97,13 @@ public class InnovativeService {
     }
 
     public OkDocResponse initOkDoc(String journeyId, String frontImage, boolean idID) {
-        OkayDocRequest request = OkayDocRequest.buildPassportRequest(
+        OkDocRequest request = OkDocRequest.buildPassportRequest(
                 config.getInnovative().getOkIdApiKey(),
                 journeyId,
                 frontImage);
 
         if (idID) {
-            request = OkayDocRequest.buildMyKadRequest(
+            request = OkDocRequest.buildMyKadRequest(
                     config.getInnovative().getOkIdApiKey(),
                     journeyId,
                     frontImage);
@@ -128,6 +130,49 @@ public class InnovativeService {
                     journeyId, e.getMessage());
         } catch (Exception e) {
             log.error("Unexpected error during OkDoc API call for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        }
+
+        return null;
+    }
+
+    public OkFaceResponse initOkFace(String journeyId, String frontImage, String selfieImage) {
+        OkFaceRequest request = OkFaceRequest.builder()
+                .apiKey(config.getInnovative().getOkFaceApiKey())
+                .journeyId(journeyId)
+                .imageIdCardBase64(frontImage)
+                .imageBestBase64(selfieImage)
+                .livenessDetection(true)
+                .build();
+
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        formData.add("apiKey", request.getApiKey());
+        formData.add("journeyId", request.getJourneyId());
+        formData.add("imageIdCardBase64", request.getImageIdCardBase64());
+        formData.add("imageBestBase64", request.getImageBestBase64());
+        formData.add("livenessDetection", true);
+
+        try {
+            log.debug("Calling OkFace API. Request: {}", request);
+
+            var response = client.post()
+                    .uri("/api/ekyc/okayface")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(formData)
+                    .retrieve()
+                    .body(OkFaceResponse.class);
+
+            log.debug("Received OkFace API response. Response: {}", response);
+
+            return response;
+        } catch (RestClientResponseException e) { // handle http error responses (4xx, 5xx)
+            log.error("OkFace API call failed with HTTP status: {} for journeyId: {}.",
+                    e.getStatusCode(), journeyId);
+        } catch (RestClientException e) { // handle client exceptions (network issues, timeouts, etc...)
+            log.error("OkFace API call failed due to client exception for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error during OkFace API call for journeyId: {}. Error: {}",
                     journeyId, e.getMessage());
         }
 

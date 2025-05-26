@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OkayDocRequest {
+public class OkDocRequest {
     // required
     private String apiKey;
     private String journeyId;
@@ -32,8 +32,8 @@ public class OkayDocRequest {
     private Boolean fontCheck; // Set False to disable font checking
     private Boolean landmarkCheck; // Set False to disable landmark checking
 
-    public static OkayDocRequest buildMyKadRequest(String apiKey, String journeyId, String frontImage) {
-        return OkayDocRequest.builder()
+    public static OkDocRequest buildMyKadRequest(String apiKey, String journeyId, String frontImage) {
+        return OkDocRequest.builder()
                 .apiKey(apiKey)
                 .journeyId(journeyId)
                 .idImageBase64Image(frontImage)
@@ -54,8 +54,8 @@ public class OkayDocRequest {
                 .build();
     }
 
-    public static OkayDocRequest buildPassportRequest(String apiKey, String journeyId, String frontImage) {
-        return OkayDocRequest.builder()
+    public static OkDocRequest buildPassportRequest(String apiKey, String journeyId, String frontImage) {
+        return OkDocRequest.builder()
                 .apiKey(apiKey)
                 .journeyId(journeyId)
                 .halfSizeImage(frontImage)
