@@ -1,3 +1,10 @@
+logging:
+  level:
+    ROOT: INFO
+    org.hibernate.SQL: DEBUG
+    org.springframework.web.client.DefaultRestClient: OFF
+    com.wan.ekyc: DEBUG
+
 application:
   innovative:
     url: <innovative-api-url>
