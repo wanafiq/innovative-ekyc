@@ -111,4 +111,19 @@ public class InnovativeResource {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/oklive/{journeyId}")
+    public ResponseEntity<?> initOkLive(@PathVariable String journeyId) {
+        String selfie = ImageUtil.getSelfieBase64();
+        if (selfie == null) {
+            return ResponseEntity.badRequest().body("Selfie is required");
+        }
+
+        var result = service.initOkLive(journeyId, selfie);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }

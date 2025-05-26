@@ -2,6 +2,7 @@ package com.wan.ekyc.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ByteArrayResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,17 @@ public class ImageUtil {
         byte[] bytes = loadFileResource(imgPath);
 
         return toBase64(bytes);
+    }
+
+    public static ByteArrayResource toByteArrayResource(String base64Image) {
+        byte[] bytes = Base64.getDecoder().decode(base64Image);
+
+        return new ByteArrayResource(bytes){
+            @Override
+            public String getFilename(){
+                return "selfie.jpg";
+            }
+        };
     }
 
     private static String toBase64(byte[] bytes) {

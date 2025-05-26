@@ -2,6 +2,7 @@ package com.wan.ekyc.service;
 
 import com.wan.ekyc.config.ApplicationConfig;
 import com.wan.ekyc.dto.innovative.*;
+import com.wan.ekyc.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -173,6 +174,47 @@ public class InnovativeService {
                     journeyId, e.getMessage());
         } catch (Exception e) {
             log.error("Unexpected error during OkFace API call for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        }
+
+        return null;
+    }
+
+    public OkLiveResponse initOkLive(String journeyId, String selfieImage) {
+        var bytes = ImageUtil.toByteArrayResource(selfieImage);
+
+        OkLiveRequest request = OkLiveRequest.builder()
+                .apiKey(config.getInnovative().getOkFaceApiKey())
+                .journeyId(journeyId)
+                .imageBest(bytes)
+                .build();
+
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        formData.add("apiKey", config.getInnovative().getOkFaceApiKey());
+        formData.add("journeyId", journeyId);
+        formData.add("imageBest", bytes);
+
+        try {
+            log.debug("Calling OkLive API. Request: {}", request);
+
+            var response = client.post()
+                    .uri("/api/ekyc/okaylive")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(formData)
+                    .retrieve()
+                    .body(OkLiveResponse.class);
+
+            log.debug("Received OkLive API response. Response: {}", response);
+
+            return response;
+        } catch (RestClientResponseException e) { // handle http error responses (4xx, 5xx)
+            log.error("OkLive API call failed with HTTP status: {} for journeyId: {}.",
+                    e.getStatusCode(), journeyId);
+        } catch (RestClientException e) { // handle client exceptions (network issues, timeouts, etc...)
+            log.error("OkLive API call failed due to client exception for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error during OkLive API call for journeyId: {}. Error: {}",
                     journeyId, e.getMessage());
         }
 
