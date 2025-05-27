@@ -253,4 +253,30 @@ public class InnovativeService {
 
         return null;
     }
+
+    public ScorecardResponse getScorecard(String journeyId) {
+        try {
+            log.debug("Calling GetScorecard API. JourneyId: {}", journeyId);
+
+            var response = client.get()
+                    .uri(String.format("/api/ekyc/v2/scorecard?journeyId=%s", journeyId))
+                    .retrieve()
+                    .body(ScorecardResponse.class);
+
+            log.debug("Received GetScorecard API response. Response: {}", response);
+
+            return response;
+        } catch (RestClientResponseException e) { // handle http error responses (4xx, 5xx)
+            log.error("GetScorecard API call failed with HTTP status: {} for journeyId: {}.",
+                    e.getStatusCode(), journeyId);
+        } catch (RestClientException e) { // handle client exceptions (network issues, timeouts, etc...)
+            log.error("GetScorecard API call failed due to client exception for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error during GetScorecard API call for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        }
+
+        return null;
+    }
 }

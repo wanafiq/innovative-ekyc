@@ -136,4 +136,14 @@ public class InnovativeResource {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/scorecard/{journeyId}")
+    public ResponseEntity<?> getScorecard(@PathVariable String journeyId) {
+        var result = service.getScorecard(journeyId);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }
