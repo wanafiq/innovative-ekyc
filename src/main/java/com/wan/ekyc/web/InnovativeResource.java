@@ -126,4 +126,14 @@ public class InnovativeResource {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/complete/{journeyId}")
+    public ResponseEntity<?> completeJourney(@PathVariable String journeyId) {
+        var result = service.completeJourney(journeyId);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }

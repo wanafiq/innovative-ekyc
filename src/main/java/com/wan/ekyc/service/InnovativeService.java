@@ -220,4 +220,37 @@ public class InnovativeService {
 
         return null;
     }
+
+    public CompleteJourneyResponse completeJourney(String journeyId) {
+        CompleteJourneyRequest request = CompleteJourneyRequest.builder()
+                .apiKey(config.getInnovative().getOkFaceApiKey())
+                .journeyId(journeyId)
+                .build();
+
+        try {
+            log.debug("Calling CompleteJourney API. Request: {}", request);
+
+            var response = client.post()
+                    .uri("/api/ekyc/complete")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .body(CompleteJourneyResponse.class);
+
+            log.debug("Received CompleteJourney API response. Response: {}", response);
+
+            return response;
+        } catch (RestClientResponseException e) { // handle http error responses (4xx, 5xx)
+            log.error("CompleteJourney API call failed with HTTP status: {} for journeyId: {}.",
+                    e.getStatusCode(), journeyId);
+        } catch (RestClientException e) { // handle client exceptions (network issues, timeouts, etc...)
+            log.error("CompleteJourney API call failed due to client exception for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error during CompleteJourney API call for journeyId: {}. Error: {}",
+                    journeyId, e.getMessage());
+        }
+
+        return null;
+    }
 }
