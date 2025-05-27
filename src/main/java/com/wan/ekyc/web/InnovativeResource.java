@@ -1,7 +1,7 @@
 package com.wan.ekyc.web;
 
 import com.wan.ekyc.service.InnovativeService;
-import com.wan.ekyc.util.ImageUtil;
+import com.wan.ekyc.common.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
