@@ -2,7 +2,7 @@ package com.wan.ekyc.service;
 
 import com.wan.ekyc.config.ApplicationConfig;
 import com.wan.ekyc.dto.innovative.*;
-import com.wan.ekyc.util.ImageUtil;
+import com.wan.ekyc.common.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class InnovativeService {
                 .build();
     }
 
-    public CreateJourneyIdResponse CreateJourneyId() {
+    public CreateJourneyIdResponse createJourneyId() {
         CreateJourneyIdRequest request = CreateJourneyIdRequest.builder()
                 .username(config.getInnovative().getUsername())
                 .password(config.getInnovative().getPassword())

@@ -19,7 +19,7 @@ public class InnovativeResource {
 
     @GetMapping("/journeyId")
     public ResponseEntity<?> createJourneyId() {
-        var result = service.CreateJourneyId();
+        var result = service.createJourneyId();
         if (result == null) {
             return ResponseEntity.internalServerError().build();
         }
