@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InitEkycRequest {
-    private String docType;
+public class EkycRequest {
+    private String journeyId;
+    private String category;
     private String frontId;
     private String backId;
     private String passport;

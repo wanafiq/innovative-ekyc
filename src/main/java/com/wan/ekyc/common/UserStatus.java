@@ -1,9 +1,0 @@
-package com.wan.ekyc.common;
-
-// PENDING_ACTIVATION -> PENDING_EKYC -> PENDING_EKYC_REVIEW -> EKYC_COMPLETE
-public enum UserStatus {
-    PENDING_ACTIVATION,
-    PENDING_EKYC,
-    PENDING_EKYC_REVIEW,
-    EKYC_COMPLETE
-}
