@@ -1,9 +1,24 @@
 logging:
   level:
     ROOT: INFO
-    org.hibernate.SQL: DEBUG
+    org.springframework.jdbc: DEBUG
     org.springframework.web.client.DefaultRestClient: OFF
     com.wan.ekyc: DEBUG
+
+spring:
+  datasource:
+    generate-unique-name: false
+    driver-class-name: org.h2.Driver
+    name: ekyc
+    url: jdbc:h2:mem:ekyc;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
 
 application:
   innovative:
