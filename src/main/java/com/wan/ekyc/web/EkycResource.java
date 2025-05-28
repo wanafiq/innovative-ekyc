@@ -70,6 +70,16 @@ public class EkycResource {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/audit/{journeyId}")
+    public ResponseEntity<?> getAudits(@PathVariable String journeyId) {
+        var result = service.getAudits(journeyId);
+        if (result == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
     private void loadSampleImage(EkycRequest req) {
         if (req.getCategory().equals(NON_PASSPORT)) {
             if (req.getFrontId().isEmpty()) {

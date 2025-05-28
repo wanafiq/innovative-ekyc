@@ -1,5 +1,6 @@
 package com.wan.ekyc.common;
 
+import com.wan.ekyc.dto.ekyc.OkIdFields;
 import com.wan.ekyc.dto.innovative.OkIdResponse;
 import com.wan.ekyc.dto.innovative.child.FieldMap;
 import com.wan.ekyc.dto.innovative.child.ResultItem;
@@ -114,11 +115,11 @@ public class EkycUtil {
     }
 
     private static String getGender(String sex) {
-       return switch (sex) {
-           case "M" -> "Male";
-           case "F" -> "Female";
-           default -> "";
-       };
+        return switch (sex) {
+            case "M" -> "Male";
+            case "F" -> "Female";
+            default -> "";
+        };
     }
 
     private static List<String> splitAddress(String address) {

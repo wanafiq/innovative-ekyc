@@ -1,4 +1,4 @@
-package com.wan.ekyc.common;
+package com.wan.ekyc.dto.ekyc;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -3,11 +3,11 @@ package com.wan.ekyc.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wan.ekyc.common.EkycUtil;
 import com.wan.ekyc.common.FileUtil;
-import com.wan.ekyc.common.OkIdFields;
+import com.wan.ekyc.dto.ekyc.OkIdFields;
 import com.wan.ekyc.dto.ekyc.EkycRequest;
 import com.wan.ekyc.dto.innovative.CreateJourneyIdResponse;
-import com.wan.ekyc.dto.innovative.OkDocResponse;
 import com.wan.ekyc.dto.innovative.OkIdResponse;
+import com.wan.ekyc.model.EkycAudit;
 import com.wan.ekyc.model.EkycDocument;
 import com.wan.ekyc.model.User;
 import com.wan.ekyc.repository.EkycDocumentRepository;
@@ -29,14 +29,16 @@ public class EkycService {
     private final UserRepository userRepo;
     private final EkycDocumentRepository documentRepo;
     private final InnovativeService innovativeService;
+    private final EkycAuditService auditService;
 
     private final String EkycFilePath = "src/main/resources/static/ekyc.json";
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public EkycService(UserRepository userRepo, EkycDocumentRepository documentRepo, InnovativeService innovativeService) {
+    public EkycService(UserRepository userRepo, EkycDocumentRepository documentRepo, InnovativeService innovativeService, EkycAuditService auditService) {
         this.userRepo = userRepo;
         this.documentRepo = documentRepo;
         this.innovativeService = innovativeService;
+        this.auditService = auditService;
     }
 
     public User initEkyc(Long userId, EkycRequest req) {
@@ -63,14 +65,18 @@ public class EkycService {
             throw new RuntimeException();
         }
 
+        String journeyId = response.getJourneyId();
+
         user.setStatus(PENDING_EKYC_REVIEW);
-        user.setJourneyId(response.getJourneyId());
+        user.setJourneyId(journeyId);
         user = userRepo.save(user);
 
         // In a real situation, this is the point where we queue ekyc processing to message broker like Kafka
         // For simplicity, we just save to local file and processEkyc will be initiated through rest call
-        req.setJourneyId(response.getJourneyId());
+        req.setJourneyId(journeyId);
         createEkycRequest(req);
+
+        auditService.saveOrUpdate(journeyId, CREATE_JOURNEY, SUCCESS, null);
 
         return user;
     }
@@ -101,6 +107,10 @@ public class EkycService {
         return user;
     }
 
+    public List<EkycAudit> getAudits(String journeyId) {
+        return auditService.getAll(journeyId);
+    }
+
     private boolean processOkId(EkycRequest request, User user) {
         String category = request.getCategory();
         String journeyId = request.getJourneyId();
@@ -110,56 +120,67 @@ public class EkycService {
 
         OkIdResponse response;
 
+        auditService.saveOrUpdate(journeyId, OKAY_ID, IN_PROGRESS, null);
+
         if (category.equals(NON_PASSPORT)) {
             response = innovativeService.initOkId(journeyId, frontId, backId, true);
         } else if(category.equals(PASSPORT)) {
             response = innovativeService.initOkId(journeyId, passport, null, false);
         } else {
             log.error("Invalid document category: {}", category);
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Invalid document category");
             return false;
         }
 
         if (response == null || !response.getStatus().equals("success")) {
             log.error("OkayId API returned failed status: {}", response != null ? response.getStatus() : "");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "OkayId API returned failed status");
             return false;
         }
 
-        return evaluateOkId(category, user, response);
+        return evaluateOkId(journeyId, category, user, response);
     }
 
-    private boolean evaluateOkId(String category, User user, OkIdResponse response) {
+    private boolean evaluateOkId(String journeyId, String category, User user, OkIdResponse response) {
         String docType = getDocumentType(category, response.getDocumentType());
         if (docType == null || docType.isEmpty()) {
             log.error("Failed to get document type, category: {}, type: {}", category, response.getDocumentType());
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "OkayId API returned failed status");
             return false;
         }
 
         OkIdFields fields = EkycUtil.translateOkIdFields(response);
         if (fields.getSurnameAndGivenName() == null || fields.getSurnameAndGivenName().isEmpty()) {
             log.error("Failed to get fullName from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get fullName");
             return false;
         }
         if (fields.getDocumentNumber() == null || fields.getDocumentNumber().isEmpty()) {
             log.error("Failed to get document number from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get document number");
             return false;
         }
         if (fields.getSex() == null || fields.getSex().isEmpty()) {
             log.error("Failed to get sex from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get sex");
             return false;
         }
         if (fields.getAddress1() == null || fields.getAddress1().isEmpty()) {
             log.error("Failed to get address1 from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get address1");
             return false;
         }
         if (fields.getAddress2() == null || fields.getAddress2().isEmpty()) {
             log.error("Failed to get address2 from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get address2");
             return false;
         }
         if (fields.getAddress3() == null || fields.getAddress3().isEmpty()) {
             log.error("Address3 is not available");
         }
         if (fields.getIssuingStateName() == null || fields.getIssuingStateName().isEmpty()) {
-            log.error("Failed to get issuing state name from OkayID API");
+            log.error("Failed to get issuingStateName from OkayID API");
+            auditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get issuingStateName");
             return false;
         }
 
