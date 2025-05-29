@@ -19,25 +19,15 @@ public class EkycAuditService {
     }
 
     public void saveOrUpdate(String journeyId, String type, String status, String remarks) {
-        Optional<EkycAudit> audit = ekycAuditRepo.findByJourneyId(journeyId);
+        EkycAudit newAudit = EkycAudit.builder()
+                .journeyId(journeyId)
+                .type(type)
+                .status(status)
+                .remarks(remarks)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        if (audit.isEmpty()) {
-            EkycAudit newAudit = EkycAudit.builder()
-                    .journeyId(journeyId)
-                    .type(type)
-                    .status(status)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            ekycAuditRepo.save(newAudit);
-            return;
-        }
-
-        EkycAudit existingAudit = audit.get();
-        existingAudit.setStatus(status);
-        existingAudit.setRemarks(remarks);
-
-        ekycAuditRepo.save(existingAudit);
+        ekycAuditRepo.save(newAudit);
     }
 
     public List<EkycAudit> getAll(String journeyId) {

@@ -1,15 +1,46 @@
 package com.wan.ekyc.common;
 
 import com.wan.ekyc.dto.ekyc.OkIdFields;
+import com.wan.ekyc.dto.innovative.OkDocResponse;
 import com.wan.ekyc.dto.innovative.OkIdResponse;
-import com.wan.ekyc.dto.innovative.child.FieldMap;
-import com.wan.ekyc.dto.innovative.child.ResultItem;
-import com.wan.ekyc.dto.innovative.child.VerifiedFields;
+import com.wan.ekyc.dto.innovative.child.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EkycUtil {
+    public static Map<String, String> getGeneralResult(OkDocResponse res) {
+        Map<String, String> results = new HashMap<>();
+
+        for (Method m : res.getMethodList()) {
+            if (!m.getMethod().equals("landmark")) {
+                List<Component> components = m.getComponentList();
+                for (Component c : components) {
+                    results.put(c.getCode(), c.getValue());
+                }
+            }
+        }
+
+        return results;
+    }
+
+    public static Map<String, BigDecimal> getLandmarkScore(OkDocResponse res) {
+        Map<String, BigDecimal> scores = new HashMap<>();
+
+        for (Method m : res.getMethodList()) {
+            if (m.getMethod().equals("landmark")) {
+                List<Component> components = m.getComponentList();
+                for (Component c : components) {
+                    scores.put(c.getCode(), new BigDecimal(c.getValue()));
+                }
+            }
+        }
+
+        return scores;
+    }
 
     public static OkIdFields translateOkIdFields(OkIdResponse res) {
         OkIdFields fields = new OkIdFields();
