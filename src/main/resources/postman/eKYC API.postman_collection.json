@@ -1,0 +1,488 @@
+{
+	"info": {
+		"_postman_id": "d9354fb0-3461-4f04-92a7-4bfe05f958b6",
+		"name": "eKYC API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34465761"
+	},
+	"item": [
+		{
+			"name": "Innovative",
+			"item": [
+				{
+					"name": "create journey id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const statusCode = pm.response.code",
+									"let data = pm.response.json()",
+									"",
+									"if (statusCode === 200) {",
+									"    pm.environment.set(\"journeyId\", data.journeyId)",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/journeyId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"journeyId"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok id - mykad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/okid/{{journeyId}}/mykad",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"okid",
+								"{{journeyId}}",
+								"mykad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok id - passport",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/okid/{{journeyId}}/passport",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"okid",
+								"{{journeyId}}",
+								"passport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok doc - mykad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/okdoc/{{journeyId}}/mykad",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"okdoc",
+								"{{journeyId}}",
+								"mykad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok doc - passport",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/okdoc/{{journeyId}}/passport",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"okdoc",
+								"{{journeyId}}",
+								"passport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok face",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/okface/{{journeyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"okface",
+								"{{journeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "init ok live",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/oklive/{{journeyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"oklive",
+								"{{journeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "complete journey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/complete/{{journeyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"complete",
+								"{{journeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get scorecard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/innovative/scorecard/{{journeyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"innovative",
+								"scorecard",
+								"{{journeyId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "init eKYC - non passport",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const statusCode = pm.response.code",
+							"let data = pm.response.json()",
+							"",
+							"if (statusCode === 200) {",
+							"    pm.environment.set(\"journeyId\", data.journeyId)",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"category\": \"NON_PASSPORT\",\n    \"frontId\": \"\",\n    \"backId\": \"\",\n    \"passport\": \"\",\n    \"selfie\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ekyc/init/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ekyc",
+						"init",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "init eKYC - passport",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const statusCode = pm.response.code",
+							"let data = pm.response.json()",
+							"",
+							"if (statusCode === 200) {",
+							"    pm.environment.set(\"journeyId\", data.journeyId)",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"category\": \"PASSPORT\",\n    \"frontId\": \"\",\n    \"backId\": \"\",\n    \"passport\": \"\",\n    \"selfie\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ekyc/init/2",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ekyc",
+						"init",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "process eKYC",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ekyc/process/{{journeyId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ekyc",
+						"process",
+						"{{journeyId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get ekyc audits",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/ekyc/audit/{{journeyId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"ekyc",
+						"audit",
+						"{{journeyId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
