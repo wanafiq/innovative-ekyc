@@ -4,6 +4,7 @@ import com.wan.ekyc.dto.ekyc.OkIdFields;
 import com.wan.ekyc.dto.innovative.OkDocResponse;
 import com.wan.ekyc.dto.innovative.OkIdResponse;
 import com.wan.ekyc.dto.innovative.child.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,34 +12,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class EkycUtil {
+    public static boolean isPassport(String docName) {
+        return docName.toUpperCase().contains(Constant.DOC_PASSPORT);
+    }
+
     public static Map<String, String> getGeneralResult(OkDocResponse res) {
         Map<String, String> results = new HashMap<>();
-
         for (Method m : res.getMethodList()) {
-            if (!m.getMethod().equals("landmark")) {
-                List<Component> components = m.getComponentList();
-                for (Component c : components) {
-                    results.put(c.getCode(), c.getValue());
-                }
+            if (m.getMethod().equals("landmark") || m.getMethod().equals("microprint") || m.getMethod().equals("docType")) {
+                continue;
+            }
+
+            List<Component> components = m.getComponentList();
+            for (Component c : components) {
+                results.put(c.getCode(), c.getValue());
             }
         }
-
         return results;
     }
 
     public static Map<String, BigDecimal> getLandmarkScore(OkDocResponse res) {
         Map<String, BigDecimal> scores = new HashMap<>();
-
         for (Method m : res.getMethodList()) {
-            if (m.getMethod().equals("landmark")) {
+            if (m.getMethod().equals("landmark") || m.getMethod().equals("microprint")) {
                 List<Component> components = m.getComponentList();
                 for (Component c : components) {
                     scores.put(c.getCode(), new BigDecimal(c.getValue()));
                 }
             }
         }
-
         return scores;
     }
 
@@ -135,7 +139,9 @@ public class EkycUtil {
             }
         }
 
-        if (fields.getAddress() != null) {
+        if (fields.getAddress() == null) {
+            fields.setAddress1(fields.getPlaceOfIssue());
+        } else {
             List<String> address = splitAddress(fields.getAddress());
             fields.setAddress1(address.get(0));
             fields.setAddress2(address.size() > 1 ? address.get(1) : "");

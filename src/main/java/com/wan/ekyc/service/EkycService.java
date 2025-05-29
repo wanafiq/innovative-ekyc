@@ -1,14 +1,13 @@
 package com.wan.ekyc.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wan.ekyc.common.DateUtil;
 import com.wan.ekyc.common.EkycUtil;
 import com.wan.ekyc.common.FileUtil;
 import com.wan.ekyc.common.ImageUtil;
 import com.wan.ekyc.dto.ekyc.EkycRequest;
 import com.wan.ekyc.dto.ekyc.OkIdFields;
-import com.wan.ekyc.dto.innovative.CreateJourneyIdResponse;
-import com.wan.ekyc.dto.innovative.OkDocResponse;
-import com.wan.ekyc.dto.innovative.OkIdResponse;
+import com.wan.ekyc.dto.innovative.*;
 import com.wan.ekyc.model.EkycAudit;
 import com.wan.ekyc.model.User;
 import com.wan.ekyc.repository.UserRepository;
@@ -19,9 +18,8 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 
 import static com.wan.ekyc.common.Constant.*;
 
@@ -104,7 +102,22 @@ public class EkycService {
 
         if (okIdSuccess) {
             log.info("Processing OkDoc");
-            processOkDoc(ekycRequest);
+            boolean okDocSuccess = processOkDoc(ekycRequest);
+
+            log.info("Processing OkFace");
+            boolean okFaceSuccess = processOkFace(ekycRequest);
+
+            log.info("Processing OkLive");
+            boolean okLiveSuccess = processOkLive(ekycRequest);
+
+            if (okLiveSuccess && okFaceSuccess && okDocSuccess) {
+                user.setStatus(COMPLETED_EKYC);
+                user = userRepo.save(user);
+
+                completeJourney(journeyId);
+
+                log.info("eKYC completed");
+            }
         }
 
         return user;
@@ -147,40 +160,50 @@ public class EkycService {
     private boolean evaluateOkId(String journeyId, String category, User user, OkIdResponse response) {
         String docType = ekycDocumentService.getDocumentType(category, response.getDocumentType());
         if (docType == null || docType.isEmpty()) {
-            log.error("Failed to get document type, category: {}, type: {}", category, response.getDocumentType());
-            ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "OkayId API returned failed status");
-            return false;
+            if (!EkycUtil.isPassport(response.getDocumentType())) {
+                log.error("Failed to get document type, category: {}, type: {}", category, response.getDocumentType());
+                ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "OkayId API returned failed status");
+                return false;
+            }
         }
 
         OkIdFields fields = EkycUtil.translateOkIdFields(response);
+
+        if (fields.getDateOfExpiry() != null) {
+            String format = "MM/dd/yyyy"; // 11/24/2032
+            LocalDate expDate = DateUtil.parseDate(fields.getDateOfExpiry(), format);
+            LocalDate today = LocalDate.now();
+            if (expDate.isBefore(today)) {
+                log.error("Document expired");
+                ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Document expired");
+                return false;
+            }
+        }
+
         if (fields.getSurnameAndGivenName() == null || fields.getSurnameAndGivenName().isEmpty()) {
             log.error("Failed to get fullName from OkayID API");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get fullName");
             return false;
         }
+
         if (fields.getDocumentNumber() == null || fields.getDocumentNumber().isEmpty()) {
             log.error("Failed to get document number from OkayID API");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get document number");
             return false;
         }
+
         if (fields.getSex() == null || fields.getSex().isEmpty()) {
             log.error("Failed to get sex from OkayID API");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get sex");
             return false;
         }
+
         if (fields.getAddress1() == null || fields.getAddress1().isEmpty()) {
             log.error("Failed to get address1 from OkayID API");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get address1");
             return false;
         }
-        if (fields.getAddress2() == null || fields.getAddress2().isEmpty()) {
-            log.error("Failed to get address2 from OkayID API");
-            ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get address2");
-            return false;
-        }
-        if (fields.getAddress3() == null || fields.getAddress3().isEmpty()) {
-            log.error("Address3 is not available");
-        }
+
         if (fields.getIssuingStateName() == null || fields.getIssuingStateName().isEmpty()) {
             log.error("Failed to get issuingStateName from OkayID API");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, FAILED, "Failed to get issuingStateName");
@@ -202,7 +225,7 @@ public class EkycService {
         return true;
     }
 
-    private void processOkDoc(EkycRequest request) {
+    private boolean processOkDoc(EkycRequest request) {
         String category = request.getCategory();
         String journeyId = request.getJourneyId();
         String frontId = request.getFrontId();
@@ -219,64 +242,159 @@ public class EkycService {
         } else {
             log.error("Invalid document category: {}", category);
             ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Invalid document category");
-            return;
+            return false;
         }
 
         if (response == null || !response.getStatus().equals("success")) {
             log.error("OkayDoc API returned failed status: {}", response != null ? response.getStatus() : "");
             ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "OkayDoc API returned failed status");
-            return;
+            return false;
         }
 
-        evaluateOkDoc(journeyId, response);
+        return evaluateOkDoc(journeyId, response);
     }
 
-    private void evaluateOkDoc(String journeyId, OkDocResponse response) {
+    private boolean evaluateOkDoc(String journeyId, OkDocResponse response) {
         Map<String, String> general = EkycUtil.getGeneralResult(response);
-        Map<String, String> gt = ekycThresholdService.getGeneralThreshold();
-        List<String> fgl = new ArrayList<>();
+        Map<String, String> generalThresholds = ekycThresholdService.getGeneralThreshold();
 
+        int failedGeneral = 0;
+        log.debug("Evaluating OkDoc general landmarks");
         for (Map.Entry<String, String> g : general.entrySet()) {
             String landmark = g.getKey();
             String actual = g.getValue();
-            String expected = gt.get(g.getKey());
+            String expected = generalThresholds.get(g.getKey());
             boolean matched = actual.equals(expected);
             log.debug("Landmark: {}, Expected: {}, Actual: {}", landmark, expected, actual);
             if (!matched) {
-                fgl.add(landmark);
+                failedGeneral++;
             }
         }
-
-        log.info("General landmark checks: {}/{} failed", fgl.size(), general.size());
-        if (!fgl.isEmpty()) {
-            ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed general landmark checks");
-        }
+        log.info("{}/{} failed \n", failedGeneral, general.size());
 
         Map<String, BigDecimal> score = EkycUtil.getLandmarkScore(response);
-        Map<String, BigDecimal> lt = ekycThresholdService.getOkDocThreshold();
-        List<String> fls = new ArrayList<>();
+        Map<String, BigDecimal> okDocThreshold = ekycThresholdService.getOkDocThreshold();
 
+        int failedScore = 0;
+        log.debug("Evaluating OkDoc score landmarks");
         for (Map.Entry<String, BigDecimal> s : score.entrySet()) {
             String landmark = s.getKey();
             BigDecimal actual = s.getValue();
-            BigDecimal expected = lt.get(s.getKey());
+            BigDecimal expected = okDocThreshold.get(s.getKey());
             log.debug("Landmark: {}, Expected Score: {}, Actual Score: {}", landmark, expected, actual);
             if (expected.compareTo(actual) > 0) { // expected is greater than actual
-                fls.add(landmark);
+                failedScore++;
+            }
+        }
+        log.info("{}/{} failed \n", failedScore, score.size());
+
+        if (failedGeneral != 0 || failedScore != 0) {
+            if (failedGeneral != 0) {
+                ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed general landmark checks");
+            }
+
+            if (failedScore == 0) {
+                ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed landmark score checks");
+            }
+
+            return false;
+        }
+
+        ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, SUCCESS, "");
+
+        return true;
+    }
+
+    private boolean processOkFace(EkycRequest request) {
+        String journeyId = request.getJourneyId();
+        String frontId = request.getFrontId();
+        String selfie = request.getSelfie();
+
+        ekycAuditService.saveOrUpdate(journeyId, OKAY_FACE, IN_PROGRESS, null);
+
+        OkFaceResponse response = innovativeService.initOkFace(journeyId, frontId, selfie);
+        if (response == null || !response.getStatus().equals("success")) {
+            log.error("OkayFace API returned failed status: {}", response != null ? response.getStatus() : "");
+            ekycAuditService.saveOrUpdate(journeyId, OKAY_FACE, FAILED, "OkayFace API returned failed status");
+            return false;
+        }
+
+        Map<String, BigDecimal> thresholds = ekycThresholdService.getOkFaceThreshold();
+
+        int failed = 0;
+        log.debug("Evaluating OkFace landmarks");
+        String landmark = "confidence";
+        BigDecimal actual = response.getResultIdCard().getConfidence();
+        BigDecimal expected = thresholds.get("confidence");
+        log.debug("Landmark: {}, Expected Score: {}, Actual Score: {}", landmark, expected, actual);
+        if (expected.compareTo(actual) > 0) { // expected is greater than actual
+            failed++;
+        }
+        log.info("{}/{} failed \n", failed, thresholds.size());
+
+        if (failed != 0) {
+            ekycAuditService.saveOrUpdate(journeyId, OKAY_FACE, FAILED, "Failed face verification confidence check");
+            return false;
+        }
+
+        ekycAuditService.saveOrUpdate(journeyId, OKAY_FACE, SUCCESS, "");
+
+        return true;
+    }
+
+    private boolean processOkLive(EkycRequest request) {
+        String journeyId = request.getJourneyId();
+        String selfie = request.getSelfie();
+
+        ekycAuditService.saveOrUpdate(journeyId, OKAY_LIVE, IN_PROGRESS, null);
+
+        OkLiveResponse response = innovativeService.initOkLive(journeyId, selfie);
+        if (response == null || !response.getStatus().equals("success")) {
+            log.error("OkayLive API returned failed status: {}", response != null ? response.getStatus() : "");
+            ekycAuditService.saveOrUpdate(journeyId, OKAY_LIVE, FAILED, "OkayLive API returned failed status");
+            return false;
+        }
+
+        Map<String, BigDecimal> thresholds = ekycThresholdService.getOkLiveThreshold();
+        Map<String, BigDecimal> results = new HashMap<>();
+        results.put("probability", response.getProbability().multiply(new BigDecimal(100)));
+        results.put("quality", response.getQuality().multiply(new BigDecimal(100)));
+
+        int failed = 0;
+        log.debug("Evaluating OkLive landmarks");
+        for (Map.Entry<String, BigDecimal> r : results.entrySet()) {
+            String landmark = r.getKey();
+            BigDecimal actual = r.getValue();
+            BigDecimal expected = thresholds.get(landmark);
+            log.debug("Landmark: {}, Expected Score: {}, Actual Score: {}", landmark, expected, actual);
+            if (expected.compareTo(actual) > 0) { // expected is greater than actual
+                failed++;
             }
         }
 
-        log.info("Landmark score checks: {}/{} failed", fls.size(), score.size());
-        if (!fls.isEmpty()) {
-            ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed landmark score checks");
+        log.info("{}/{} failed \n", failed, thresholds.size());
+        if (failed != 0) {
+            ekycAuditService.saveOrUpdate(journeyId, OKAY_LIVE, FAILED, "Failed landmark score checks");
+            return false;
         }
 
-        if (fgl.isEmpty() && fls.isEmpty()) {
-            ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, SUCCESS, "");
-        }
+        ekycAuditService.saveOrUpdate(journeyId, OKAY_LIVE, SUCCESS, "");
+
+        return true;
     }
 
-    public void createEkycRequest(EkycRequest request) {
+    public void completeJourney(String journeyId) {
+        CompleteJourneyResponse response = innovativeService.completeJourney(journeyId);
+        if (response == null || !response.getStatus().equals("success")) {
+            log.error("CompleteJourney API returned failed status: {}", response != null ? response.getStatus() : "");
+            ekycAuditService.saveOrUpdate(journeyId, COMPLETE_JOURNEY, FAILED, "CompleteJourney API returned failed status");
+            return;
+        }
+
+        ekycAuditService.saveOrUpdate(journeyId, COMPLETE_JOURNEY, SUCCESS, "");
+    }
+
+    private void createEkycRequest(EkycRequest request) {
         FileUtil.delete(EkycFilePath);
         File file = FileUtil.create(EkycFilePath);
 
@@ -288,7 +406,7 @@ public class EkycService {
         }
     }
 
-    public EkycRequest getEkycRequest() {
+    private EkycRequest getEkycRequest() {
         if (!FileUtil.exists(EkycFilePath)) {
             log.error("Ekyc file not found: {}", EkycFilePath);
             throw new RuntimeException();

@@ -162,6 +162,7 @@ VALUES
     ('NON_PASSPORT', 'ID', 'Vietnam - Id Card #1', 12),
     ('PASSPORT', 'PASSPORT', 'Vietnam - Passport(2005)', 12);
 
+-- ekyc_thresholds data
 INSERT INTO ekyc_thresholds (code, label, type, d_value, s_value)
 VALUES
     -- GENERAL
@@ -182,10 +183,19 @@ VALUES
     ('illuminationLevel', 'Illumination Level', 'GENERAL', null, 'Pass'),
     ('headerColorDiff', 'Header Color Difference', 'GENERAL', null, 'Pass'),
 
+    -- FACE_VERIFICATION
+    -- https://api2-ekycportal.innov8tif.com/emas-ekyc-portal/centralized-okayface/interpretation-of-result-and-recommended-threshold
+    ('confidence', 'OkFace Face Verification Confidence', 'FACE_VERIFICATION', 75, null),
+
+    -- LIVENESS
+    -- https://api2-ekycportal.innov8tif.com/emas-ekyc-portal/centralized-okaylive/interpretation-of-result-and-recommended-threshold
+    ('probability', 'OkLive Liveness Detection Probability', 'LIVENESS', 50, null),
+    ('quality', 'OkLive Liveness Detection Quality', 'LIVENESS', 50, null),
+
     -- NON_PASSPORT
     -- Brunei
-    -- ID Domestic: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-domestic-id-card/versions
-    -- ID Permanent: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-permanent-id-card/versions
+    -- ID Domestic: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-domestic-id-card/recommended-threshold
+    -- ID Permanent: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-permanent-id-card/recommended-threshold
     ('l-bn-did-header', 'Kad Pengenalan Header', 'NON_PASSPORT', 30, null),
     ('l-bn-did-country', 'Negara Brunei Darussalam', 'NON_PASSPORT', 30, null),
     ('l-bn-did-logo', 'Logo', 'NON_PASSPORT', 30, null),
@@ -204,8 +214,8 @@ VALUES
     ('l-bn-pic-permanent-r', 'Penduduk Tetap', 'NON_PASSPORT', 30, null),
 
     -- Cambodia
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/cambodia/kh-id-card-front/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/cambodia/kh-id-card-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/china/cn-id-card-front/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/china/cn-id-card-back/recommended-threshold
     ('l-kh-id-front-landmark1', 'Landmark 1', 'NON_PASSPORT', 30, null),
     ('l-kh-id-front-landmark1', 'Landmark 2', 'NON_PASSPORT', 30, null),
     ('l-kh-id-front-landmark3', 'Landmark 3', 'NON_PASSPORT', 30, null),
@@ -235,8 +245,8 @@ VALUES
     ('l-ch-id-back-header', 'Header Landmark', 'NON_PASSPORT', 30, null),
 
     -- Taiwan
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/taiwan/tw-id-card-front/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/taiwan/tw-id-card-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/taiwan/tw-id-card-front/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/taiwan/tw-id-card-back/recommended-threshold
     ('l-tw-id-flag', 'Flag Landmark', 'NON_PASSPORT', 30, null),
     ('l-tw-id-logo', 'Logo Landmark', 'NON_PASSPORT', 30, null),
     ('l-tw-id-stamp', 'Stamp Landmark', 'NON_PASSPORT', 30, null),
@@ -245,8 +255,8 @@ VALUES
     ('l-tw-id-back-logo-2', 'Logo 2 Landmark', 'NON_PASSPORT', 30, null),
 
     -- Hong Kong
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/hong-kong/hk-id-card-front/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/hong-kong/hk-id-card-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/hong-kong/hk-id-card-front/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/hong-kong/hk-id-card-back/recommended-threshold
     ('l-hk-id-header', 'Header', 'NON_PASSPORT', 30, null),
     ('l-hk-id-dob', 'Date of Birth', 'NON_PASSPORT', 30, null),
     ('l-hk-id-issue-d', 'Date of Issue', 'NON_PASSPORT', 30, null),
@@ -255,10 +265,10 @@ VALUES
     ('l-hk-id-back-logo-petal', 'Petal', 'NON_PASSPORT', 30, null),
 
     -- Indonesia
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-e-ktp-front/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-e-ktp-back/versions
-    -- DL Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-driving-license-2019-front/versions
-    -- DL Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-driving-license-2019-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-e-ktp-front/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-e-ktp-back/recommended-threshold
+    -- DL Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-driving-license-2019-front/recommended-threshold
+    -- DL Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/indonesia/idn-driving-license-2019-back/recommended-threshold
     ('l-ektp-front-nik', 'Nik', 'NON_PASSPORT', 30, null),
     ('l-ektp-front-nama-alamat', 'Nama Alamat', 'NON_PASSPORT', 30, null),
     ('l-ektp-front-kecamatan', 'Rt Rw Kecamatan', 'NON_PASSPORT', 30, null),
@@ -276,20 +286,20 @@ VALUES
     ('l-id-dl-back-pattern-right', 'Pattern Right Landmark', 'NON_PASSPORT', 30, null),
 
     -- Malaysia
-    -- MyKad Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykad-front/versions
-    -- MyKad Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykad-back/versions
-    -- MyKas Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykas/versions
-    -- MyKas Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykas-back/versions
-    -- MyPR Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypr/versions
-    -- MyPR Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypr-back/versions
-    -- MyTentera Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mytentera/versions
-    -- MyTentera Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mytentera-back/versions
-    -- MyOKU Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-myoku/versions
-    -- MyOKU Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-myoku-back/versions
-    -- MyKid Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykid/versions
-    -- MyKid Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykid-back/versions
-    -- MyPOCA: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypoca/versions
-    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-driving-license/versions
+    -- MyKad Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykad-front/recommended-threshold
+    -- MyKad Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykad-back/recommended-threshold
+    -- MyKas Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykas/recommended-threshold
+    -- MyKas Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykas-back/recommended-threshold
+    -- MyPR Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypr/recommended-threshold
+    -- MyPR Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypr-back/recommended-threshold
+    -- MyTentera Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mytentera/recommended-threshold
+    -- MyTentera Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mytentera-back/recommended-threshold
+    -- MyOKU Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-myoku/recommended-threshold
+    -- MyOKU Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-myoku-back/recommended-threshold
+    -- MyKid Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykid/recommended-threshold
+    -- MyKid Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mykid-back/recommended-threshold
+    -- MyPOCA: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-mypoca/recommended-threshold
+    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/malaysia/mys-driving-license/recommended-threshold
     ('l-mykad-header', 'Kad Pengenalan Header', 'NON_PASSPORT', 30, null),
     ('l-mykad-logo', 'MyKad Logo', 'NON_PASSPORT', 30, null),
     ('l-my-flag-logo', 'Malaysia Flag', 'NON_PASSPORT', 30, null),
@@ -360,7 +370,7 @@ VALUES
     ('l-my-dl-validity', 'Validity', 'NON_PASSPORT', 30, null),
 
     -- Myanmar
-    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/myanmar/mm-driving-license/versions
+    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/myanmar/mm-driving-license/recommended-threshold
     ('l-mm-dl-logo', 'Logo', 'NON_PASSPORT', 30, null),
     ('l-mm-dl-header-burmese', 'Myanmar Driving License In Burmese', 'NON_PASSPORT', 30, null),
     ('l-mm-dl-header', 'Myanmar Driving License', 'NON_PASSPORT', 30, null),
@@ -372,16 +382,16 @@ VALUES
     ('l-mm-dl-expiry-d', 'Valid Up To', 'NON_PASSPORT', 30, null),
 
     -- Philippines
-    -- SSS Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-sss/versions
-    -- SSS Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-sss-back/versions
-    -- UMID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-umid/versions
-    -- Voter ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-voter-id/versions
-    -- Postal ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-postal-id/versions
-    -- Postal ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-postal-id-back/versions
-    -- PRC Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-prc-professional-id-card/versions
-    -- PRC Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-prc-professional-id-card-back/versions
-    -- National ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-national-id-philsys/versions
-    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-driving-license/versions
+    -- SSS Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-sss/recommended-threshold
+    -- SSS Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-sss-back/recommended-threshold
+    -- UMID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-umid/recommended-threshold
+    -- Voter ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-voter-id/recommended-threshold
+    -- Postal ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-postal-id/recommended-threshold
+    -- Postal ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-postal-id-back/recommended-threshold
+    -- PRC Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-prc-professional-id-card/recommended-threshold
+    -- PRC Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-prc-professional-id-card-back/recommended-threshold
+    -- National ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-national-id-philsys/recommended-threshold
+    -- DL: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/philippines/ph-driving-license/recommended-threshold
     ('l-ph-dl-flag', 'Philippines Flag', 'NON_PASSPORT', 30, null),
     ('l-ph-dl-header', 'Header', 'NON_PASSPORT', 30, null),
     ('l-ph-dl-logo', 'Logo', 'NON_PASSPORT', 30, null),
@@ -419,8 +429,8 @@ VALUES
     ('l-ph-ni-logo3', 'Logo 3 Landmark', 'NON_PASSPORT', 30, null),
 
     -- Singapore
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/singapore/sg-nric-pr-front/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/singapore/sg-nric-pr-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/singapore/sg-nric-pr-front/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/singapore/sg-nric-pr-back/recommended-threshold
     ('l-sg-lic-coatofarm', 'Coat of Arms', 'NON_PASSPORT', 30, null),
     ('l-sg-lic-lionhead', 'Lion Head Symbol', 'NON_PASSPORT', 30, null),
     ('l-sg-lic-republic', 'Republic of Singapore', 'NON_PASSPORT', 30, null),
@@ -429,8 +439,8 @@ VALUES
     ('l-sg-idb-logo', 'Logo', 'NON_PASSPORT', 30, null),
 
     -- Thailand
-    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/thailand/th-id-card/versions
-    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/thailand/th-id-card-back/versions
+    -- ID Front: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/thailand/th-id-card/recommended-threshold
+    -- ID Back: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/thailand/th-id-card-back/recommended-threshold
     ('l-th-id-logo', 'Logo', 'NON_PASSPORT', 30, null),
     ('l-th-id-no', 'Identification Number', 'NON_PASSPORT', 30, null),
     ('l-th-id-card', 'Thai National ID Card', 'NON_PASSPORT', 30, null),
@@ -445,7 +455,7 @@ VALUES
     ('l-th-id-back-flag', 'Flag', 'NON_PASSPORT', 30, null),
 
     -- United Arab Emirates
-    -- ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/united-arab-emirates/uae-id-card/versions
+    -- ID: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/united-arab-emirates/uae-id-card/recommended-threshold
     ('l-uae', 'UAE', 'NON_PASSPORT', 30, null),
     ('l-uae-id-card', 'Identity Card', 'NON_PASSPORT', 30, null),
     ('l-uae-arabic', 'UAE In Arabic', 'NON_PASSPORT', 30, null),
@@ -456,8 +466,8 @@ VALUES
     ('l-uae-nationality', 'Nationality', 'NON_PASSPORT', 30, null),
 
     -- Vietnam
-    -- ID Old: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/vietnam/vn-old-id-card/versions
-    -- ID New: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/vietnam/vn-new-id-card/versions
+    -- ID Old: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/vietnam/vn-old-id-card/recommended-threshold
+    -- ID New: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/vietnam/vn-new-id-card/recommended-threshold
     ('l-vn-old-id-front-logo', 'Logo', 'NON_PASSPORT', 30, null),
     ('l-vn-old-id-front-header1', 'Header1', 'NON_PASSPORT', 30, null),
     ('l-vn-old-id-front-header2', 'Header2', 'NON_PASSPORT', 30, null),

@@ -151,7 +151,7 @@ public class InnovativeService {
         formData.add("journeyId", request.getJourneyId());
         formData.add("imageIdCardBase64", request.getImageIdCardBase64());
         formData.add("imageBestBase64", request.getImageBestBase64());
-        formData.add("livenessDetection", true);
+        formData.add("livenessDetection", false);
 
         try {
             log.debug("Calling OkFace API. Request: {}", request);
