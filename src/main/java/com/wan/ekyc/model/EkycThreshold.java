@@ -13,8 +13,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "ekyc_landmarks")
-public class EkycLandmark {
+@Table(name = "ekyc_thresholds")
+public class EkycThreshold {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

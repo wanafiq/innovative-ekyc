@@ -3,6 +3,7 @@ package com.wan.ekyc.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wan.ekyc.common.EkycUtil;
 import com.wan.ekyc.common.FileUtil;
+import com.wan.ekyc.common.ImageUtil;
 import com.wan.ekyc.dto.ekyc.EkycRequest;
 import com.wan.ekyc.dto.ekyc.OkIdFields;
 import com.wan.ekyc.dto.innovative.CreateJourneyIdResponse;
@@ -32,12 +33,15 @@ public class EkycService {
     private final InnovativeService innovativeService;
     private final EkycAuditService ekycAuditService;
     private final EkycDocumentService ekycDocumentService;
-    private final EkycLandmarkService ekycLandmarkService;
+    private final EkycThresholdService ekycThresholdService;
 
     private final String EkycFilePath = "src/main/resources/static/ekyc.json";
     private final ObjectMapper mapper = new ObjectMapper();
 
     public User initEkyc(Long userId, EkycRequest req) {
+        // load sample image if not they are not provided
+        loadSampleImage(req);
+
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User with id {} not found", userId);
@@ -121,9 +125,9 @@ public class EkycService {
 
         ekycAuditService.saveOrUpdate(journeyId, OKAY_ID, IN_PROGRESS, null);
 
-        if (category.equals(NON_PASSPORT)) {
+        if (category.equals(DOC_NON_PASSPORT)) {
             response = innovativeService.initOkId(journeyId, frontId, backId, true);
-        } else if(category.equals(PASSPORT)) {
+        } else if(category.equals(DOC_PASSPORT)) {
             response = innovativeService.initOkId(journeyId, passport, null, false);
         } else {
             log.error("Invalid document category: {}", category);
@@ -208,9 +212,9 @@ public class EkycService {
 
         ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, IN_PROGRESS, null);
 
-        if (category.equals(NON_PASSPORT)) {
+        if (category.equals(DOC_NON_PASSPORT)) {
             response = innovativeService.initOkDoc(journeyId, frontId, true);
-        } else if(category.equals(PASSPORT)) {
+        } else if(category.equals(DOC_PASSPORT)) {
             response = innovativeService.initOkDoc(journeyId, passport, false);
         } else {
             log.error("Invalid document category: {}", category);
@@ -224,44 +228,45 @@ public class EkycService {
             return;
         }
 
-        evaluateOkDoc(journeyId, category, response);
+        evaluateOkDoc(journeyId, response);
     }
 
-    private void evaluateOkDoc(String journeyId, String category, OkDocResponse response) {
-        Map<String, String> gr = EkycUtil.getGeneralResult(response);
-        Map<String, String> gt = ekycLandmarkService.getGeneralThresholds();
+    private void evaluateOkDoc(String journeyId, OkDocResponse response) {
+        Map<String, String> general = EkycUtil.getGeneralResult(response);
+        Map<String, String> gt = ekycThresholdService.getGeneralThreshold();
         List<String> fgl = new ArrayList<>();
 
-        for (Map.Entry<String, String> g : gr.entrySet()) {
-            String expected = gt.get(g.getKey());
+        for (Map.Entry<String, String> g : general.entrySet()) {
+            String landmark = g.getKey();
             String actual = g.getValue();
+            String expected = gt.get(g.getKey());
             boolean matched = actual.equals(expected);
-            log.debug("Landmark: {}, Expected: {}, Actual: {}", g.getKey(), expected, actual);
+            log.debug("Landmark: {}, Expected: {}, Actual: {}", landmark, expected, actual);
             if (!matched) {
-                fgl.add(g.getKey());
+                fgl.add(landmark);
             }
         }
 
-        log.info("General landmark checks: {}/{} failed", fgl.size(), gr.size());
+        log.info("General landmark checks: {}/{} failed", fgl.size(), general.size());
         if (!fgl.isEmpty()) {
             ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed general landmark checks");
         }
 
-        Map<String, BigDecimal> ls = EkycUtil.getLandmarkScore(response);
-        Map<String, BigDecimal> lt = ekycLandmarkService.getLandmarkThresholds(category);
+        Map<String, BigDecimal> score = EkycUtil.getLandmarkScore(response);
+        Map<String, BigDecimal> lt = ekycThresholdService.getOkDocThreshold();
         List<String> fls = new ArrayList<>();
 
-        for (Map.Entry<String, BigDecimal> l : ls.entrySet()) {
-            BigDecimal expected = ls.get(l.getKey());
-            BigDecimal actual = lt.get(l.getKey());
-            boolean lessThan = actual.compareTo(expected) < 0;
-            log.debug("Landmark: {}, Expected Score: {}, Actual Score: {}", l.getKey(), expected, actual);
-            if (!lessThan) {
-                fls.add(l.getKey());
+        for (Map.Entry<String, BigDecimal> s : score.entrySet()) {
+            String landmark = s.getKey();
+            BigDecimal actual = s.getValue();
+            BigDecimal expected = lt.get(s.getKey());
+            log.debug("Landmark: {}, Expected Score: {}, Actual Score: {}", landmark, expected, actual);
+            if (expected.compareTo(actual) > 0) { // expected is greater than actual
+                fls.add(landmark);
             }
         }
 
-        log.info("Landmark score checks: {}/{} failed", fls.size(), ls.size());
+        log.info("Landmark score checks: {}/{} failed", fls.size(), score.size());
         if (!fls.isEmpty()) {
             ekycAuditService.saveOrUpdate(journeyId, OKAY_DOC, FAILED, "Failed landmark score checks");
         }
@@ -273,7 +278,7 @@ public class EkycService {
 
     public void createEkycRequest(EkycRequest request) {
         FileUtil.delete(EkycFilePath);
-        File file = FileUtil.create(EkycFilePath);;
+        File file = FileUtil.create(EkycFilePath);
 
         try {
             mapper.writeValue(file, request);
@@ -298,4 +303,21 @@ public class EkycService {
         }
     }
 
+    private void loadSampleImage(EkycRequest req) {
+        if (req.getFrontId().isEmpty()) {
+            req.setFrontId(ImageUtil.getFrontIdBase64());
+        }
+
+        if (req.getBackId().isEmpty()) {
+            req.setBackId(ImageUtil.getBackIdBase64());
+        }
+
+        if (req.getSelfie().isEmpty()) {
+            req.setSelfie(ImageUtil.getSelfieBase64());
+        }
+
+        if (req.getPassport().isEmpty()) {
+            req.setPassport(ImageUtil.getPassportBase64());
+        }
+    }
 }

@@ -2,8 +2,8 @@ package com.wan.ekyc.common;
 
 public class Constant {
     // Document Category
-    public static final String NON_PASSPORT = "NON_PASSPORT";
-    public static final String PASSPORT = "PASSPORT";
+    public static final String DOC_NON_PASSPORT = "NON_PASSPORT";
+    public static final String DOC_PASSPORT = "PASSPORT";
 
     // Document Type
     public static final String ID = "ID";
@@ -23,6 +23,13 @@ public class Constant {
     public static final String OKAY_LIVE = "OKAY_LIVE";
     public static final String COMPLETE_JOURNEY = "COMPLETE_JOURNEY";
     public static final String GET_SCORECARD = "GET_SCORECARD";
+
+    // eKYC Threshold Type
+    public static final String THRESHOLD_GENERAL = "GENERAL";
+    public static final String THRESHOLD_NON_PASSPORT = "NON_PASSPORT";
+    public static final String THRESHOLD_PASSPORT = "PASSPORT";
+    public static final String THRESHOLD_FACE_VERIFICATION = "FACE_VERIFICATION";
+    public static final String THRESHOLD_LIVENESS = "LIVENESS";
 
     // eKYC Audit Status
     public static final String IN_PROGRESS = "IN_PROGRESS";

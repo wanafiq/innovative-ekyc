@@ -34,12 +34,13 @@ CREATE TABLE ekyc_documents
     FOREIGN KEY (country_id) REFERENCES ekyc_countries (id)
 );
 
-CREATE TABLE ekyc_landmarks
+CREATE TABLE ekyc_thresholds
 (
     id      INT PRIMARY KEY AUTO_INCREMENT,
     code    VARCHAR(255) NOT NULL,
     label   VARCHAR(255) NOT NULL,
-    type    VARCHAR(255) NOT NULL, -- GENERAL, PASSPORT, NON_PASSPORT
+    -- GENERAL, NON_PASSPORT, PASSPORT, FACE_VERIFICATION, LIVENESS,
+    type    VARCHAR(255) NOT NULL,
     d_value DECIMAL,               -- decimal value
     s_value VARCHAR(255)           -- Pass, Fail, Cautious
 );
@@ -161,9 +162,9 @@ VALUES
     ('NON_PASSPORT', 'ID', 'Vietnam - Id Card #1', 12),
     ('PASSPORT', 'PASSPORT', 'Vietnam - Passport(2005)', 12);
 
-INSERT INTO ekyc_landmarks (code, label, type, d_value, s_value)
+INSERT INTO ekyc_thresholds (code, label, type, d_value, s_value)
 VALUES
-    -- General landmarks
+    -- GENERAL
     ('idBlurDetection', 'ID Blur Detection', 'GENERAL', null, 'Pass'),
     ('idBrightnessDetc', 'ID Brightness Detection', 'GENERAL', null, 'Pass'),
     ('faceBrightnessDetc', 'Face Brightness Detection', 'GENERAL', null, 'Pass'),
@@ -181,6 +182,7 @@ VALUES
     ('illuminationLevel', 'Illumination Level', 'GENERAL', null, 'Pass'),
     ('headerColorDiff', 'Header Color Difference', 'GENERAL', null, 'Pass'),
 
+    -- NON_PASSPORT
     -- Brunei
     -- ID Domestic: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-domestic-id-card/versions
     -- ID Permanent: https://api2-ekycapis.innov8tif.com/okaydoc/okaydoc-all/supported-documents/brunei/bn-permanent-id-card/versions
